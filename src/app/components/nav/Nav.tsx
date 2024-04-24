@@ -10,15 +10,19 @@ import { MdAnalytics, MdOutlineKeyboardArrowDown, MdOutlinePermMedia, MdOutlineR
 import {  IoHomeOutline, IoSettingsOutline } from 'react-icons/io5';
 import { FaHandshakeSimple, FaUserGroup } from 'react-icons/fa6';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { GoSignOut } from 'react-icons/go';
 import { LiaBugSolid, LiaFileInvoiceSolid } from 'react-icons/lia';
 import { TbApps, TbBrandBooking } from 'react-icons/tb';
 import DropDownMenu from './DropDownMenu';
 import { GiLinkedRings } from 'react-icons/gi';
+import { GetData } from '@/app/utils/ApiCalls';
+import { UserType } from '@/app/types/UserType';
+import { capitalizeInitials, capitalizeName } from '@/app/utils/Capitalize';
 
 const Nav = () => {
     const [toggle, setToggle] = useState(false)
+    const [user, setUser] = useState<UserType | null>(null);
 
 
     const pathname = usePathname();
@@ -30,6 +34,19 @@ const Nav = () => {
         }
         return pathname.startsWith(link);
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const response = await GetData('user');
+            setUser(response);
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        };
+      
+        fetchData();
+      }, []);
 
     const items = [
         {name: 'Settings',icon: <IoSettingsOutline /> , function: ''},
@@ -83,7 +100,7 @@ const Nav = () => {
                     <Menu.Button className="inline-flex w-full justify-between rounded-lg text-black p-3 text-sm font-medium  focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
                         <button className='p-[10px] flex gap-1 w-[81px] h-[40px] cursor-pointer bg-[#EFF1F6] rounded-full items-center justify-between'>
                             <span className="bg-gradient-to-br from-[#5C6670] to-[#131316] text-white rounded-full p-2">
-                                OJ
+                                {capitalizeInitials(user?.first_name ? user?.first_name : '', user?.last_name? user?.last_name: '')}
                             </span> <IoIosMenu className='h-[24px] w-[24px]' /> 
                         </button>
                     </Menu.Button>
@@ -101,11 +118,15 @@ const Nav = () => {
                             <div className="px-1 py-1 w-full ">
                                 <div className='p-2 flex items-start gap-2'>
                                     <span className="bg-gradient-to-br from-[#5C6670] to-[#131316] text-white rounded-full p-2">
-                                        OJ
+                                    {capitalizeInitials(user?.first_name ? user?.first_name : '', user?.last_name? user?.last_name: '')}
+
                                     </span>
                                     <span className='flex flex-col'>
-                                        <p className=""> Oliver Jones</p>
-                                        <p className="text-xs font-thin">oliverjones@gmail.com </p>
+                                        <span className="flex items-center gap-2"> 
+                                            <span> {user?.first_name ? user?.first_name : ''  } </span>
+                                            <span>{user?.last_name ? user?.first_name : ''} </span>
+                                         </span>
+                                        <p className="text-xs font-thin">{user ? user.email : ''} </p>
                                     </span>
                                 </div>
                                 {

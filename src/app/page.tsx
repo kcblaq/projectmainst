@@ -9,9 +9,10 @@ import { Fragment, useEffect, useState } from "react";
 import SelectCheckboxes from "./components/SelectCheckboxex";
 import ButtonGray from "./components/ButtonGray";
 import { Transition } from "@headlessui/react";
-import { GetData } from "../utils/ApiCalls";
 import { TransactionType } from "./types/TransactionType";
 import TransactionCard from "./components/TransactionCard";
+import { GetData } from "./utils/ApiCalls";
+import { getFormattedDate } from "./utils/gteFormartedDate";
 
 
 export default function Home() {
@@ -38,7 +39,7 @@ export default function Home() {
       fetchData();
     }, []);
 
-    console.log(transactions)
+    // console.log(transactions)
     
   const dates = ['Today', 'Last 7 days', 'This month', 'Last 3 months']
   return (
@@ -133,16 +134,43 @@ export default function Home() {
                       </span>
                     </div>
                     <div className="flex items-center justify-center w-full gap-1">
-                      {
-                        dates.map((date) => {
-                          return (
-                            <button className={`rounded-full px-1 text-sm border hover:bg-gray-300 py-2 w-full font-bold text-[#131316] ${filter.date == date ? 'bg-gray-300' : 'bg-[#EFF1F6]'}`}
-                              onClick={() => setFilter({ ...filter, date })}>
-                              {date}
-                            </button>
-                          )
-                        })
-                      }
+
+
+                    {
+  dates.map((date) => {
+    return (
+      <button
+        key={date}
+        className={`rounded-full px-1 text-sm border hover:bg-gray-300 py-2 w-full font-bold text-[#131316] ${filter.date === date ? 'bg-gray-300' : 'bg-[#EFF1F6]'}`}
+        onClick={() => {
+          setFilter({ ...filter, date });
+          switch (date) {
+            case 'Today':
+              setTransactions(transactions.filter((item) => {
+                item.date === getFormattedDate()
+              }));
+              break;
+            case 'Last 7 days':
+              // Implement logic to filter transactions for the last 7 days
+              break;
+            case 'This month':
+              // Implement logic to filter transactions for the current month
+              break;
+            case 'Last 3 months':
+              // Implement logic to filter transactions for the last 3 months
+              break;
+            default:
+              // Handle other cases if needed
+              break;
+          }
+        }}
+      >
+        {date}
+      </button>
+    );
+  })
+}
+
 
                     </div>
                     <div className="flex flex-col">

@@ -1,5 +1,6 @@
-import { capitalizeFirstLetter } from "@/utils/Capitalize";
+
 import { GoArrowDownLeft } from "react-icons/go";
+import { capitalizeFirstLetter } from "../utils/Capitalize";
 
 interface Props {
     type: string;
