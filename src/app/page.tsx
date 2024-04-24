@@ -13,6 +13,7 @@ import { TransactionType } from "./types/TransactionType";
 import TransactionCard from "./components/TransactionCard";
 import { GetData } from "./utils/ApiCalls";
 import { getFormattedDate } from "./utils/gteFormartedDate";
+import PlaceholderCard from "./components/PlaceholderCard";
 
 
 export default function Home() {
@@ -26,21 +27,25 @@ export default function Home() {
     status: ''
   })
 
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const response = await GetData('transactions');
-          setTransactions(response);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-    
-      fetchData();
-    }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await GetData('transactions');
+        setTransactions(response);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-    // console.log(transactions)
-    
+    fetchData();
+  }, []);
+
+  // useEffect(()=> {
+
+  // }[transactions])
+
+  // console.log("DateE:",getFormattedDate())
+
   const dates = ['Today', 'Last 7 days', 'This month', 'Last 3 months']
   return (
     <BodyLayout>
@@ -105,7 +110,7 @@ export default function Home() {
         <div className="grid">
 
           <p className="text-[#131316] font-black "> {transactions.length} Transactions</p>
-          <p className="text-sm text-[#56616B "> Your transactions for the last 7 days</p>
+          <p className="text-sm text-[#56616B "> {filter.date.length < 4 ? `Your transactions ` : `Your transactions for ${filter.date} `}</p>
         </div>
         <div className="flex items-center gap-3">
 
@@ -136,40 +141,36 @@ export default function Home() {
                     <div className="flex items-center justify-center w-full gap-1">
 
 
-                    {
-  dates.map((date) => {
-    return (
-      <button
-        key={date}
-        className={`rounded-full px-1 text-sm border hover:bg-gray-300 py-2 w-full font-bold text-[#131316] ${filter.date === date ? 'bg-gray-300' : 'bg-[#EFF1F6]'}`}
-        onClick={() => {
-          setFilter({ ...filter, date });
-          switch (date) {
-            case 'Today':
-              setTransactions(transactions.filter((item) => {
-                item.date === getFormattedDate()
-              }));
-              break;
-            case 'Last 7 days':
-              // Implement logic to filter transactions for the last 7 days
-              break;
-            case 'This month':
-              // Implement logic to filter transactions for the current month
-              break;
-            case 'Last 3 months':
-              // Implement logic to filter transactions for the last 3 months
-              break;
-            default:
-              // Handle other cases if needed
-              break;
-          }
-        }}
-      >
-        {date}
-      </button>
-    );
-  })
-}
+                      {
+                        dates.map((date) => {
+                          return (
+                            <button
+                              key={date}
+                              className={`rounded-full px-1 text-sm border hover:bg-gray-300 py-2 w-full font-bold text-[#131316] ${filter.date === date ? 'bg-gray-300' : 'bg-[#EFF1F6]'}`}
+                              onClick={() => {
+                                setFilter({ ...filter, date });
+                                switch (date) {
+                                  case 'Today':
+                                    setTransactions(transactions.filter((item) => {
+                                      item.date === getFormattedDate()
+                                    }));
+                                    break;
+                                  case 'Last 7 days':
+                                    break;
+                                  case 'This month':
+                                    break;
+                                  case 'Last 3 months':
+                                    break;
+                                  default:
+                                    break;
+                                }
+                              }}
+                            >
+                              {date}
+                            </button>
+                          );
+                        })
+                      }
 
 
                     </div>
@@ -234,14 +235,15 @@ export default function Home() {
         </div>
       </section>
       <hr className="w-full my-4 2xl:mt-6" />
-      <section className="grid w-full gap-6">
-          {
-            transactions.map((trans) => {
-              return <div className='' key={trans.payment_reference}>
-<TransactionCard type={trans.type} amount={trans.amount} date={trans.date} product={trans.metadata?.product_name} name={ trans.metadata?.name } status={trans.status}  />
-              </div>
-            })
-          }
+      <section className="grid w-full gap-6 min-h-[286px] py-10">
+        {
+         transactions.length > 0 ? transactions.map((trans) => {
+            return <div className='' key={trans.payment_reference}>
+              <TransactionCard type={trans.type} amount={trans.amount} date={trans.date} product={trans.metadata?.product_name} name={trans.metadata?.name} status={trans.status} />
+            </div>
+          })
+          : <PlaceholderCard />
+        }
       </section>
 
     </BodyLayout>
