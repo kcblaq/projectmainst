@@ -49,7 +49,7 @@ ChartJS.register(
     },
     scales: {
       x: {
-        display: true,
+        display: false,
       },
       y: {
         display: false,
@@ -67,6 +67,7 @@ ChartJS.register(
   return (
     <div className="min-w-[550px] min-h-[100%]">
       <Line data={data} options={options} />
+      
     </div>
   );
 };

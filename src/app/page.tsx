@@ -14,11 +14,19 @@ import TransactionCard from "./components/TransactionCard";
 import { GetData } from "./utils/ApiCalls";
 import { getFormattedDate } from "./utils/gteFormartedDate";
 import PlaceholderCard from "./components/PlaceholderCard";
+import { WalletType } from "./types/WalletType";
 
 
 export default function Home() {
   const [show, setShow] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [wallet, setWallet] = useState<WalletType>({
+    balance: 0,
+    total_payout: 0,
+    total_revenue: 0,
+    pending_payout: 0,
+    ledger_balance: 0
+  });
 
   const [filter, setFilter] = useState({
     date: '',
@@ -27,22 +35,31 @@ export default function Home() {
     status: ''
   })
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await GetData('transactions');
-        setTransactions(response);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const response = await GetData('transactions');
+      setTransactions(response);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
+  const fetchWallet = async () => {
+    try {
+      const response = await GetData('wallet');
+      setWallet(response);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
-  // useEffect(()=> {
-
-  // }[transactions])
+  useEffect(()=> {
+    fetchWallet()
+  },[])
 
   // console.log("DateE:",getFormattedDate())
 
@@ -64,41 +81,54 @@ export default function Home() {
             <More />
           </span>
         </div>
-        <div className='grid gap-10'>
+        <div className='grid gap-10 w-full'>
           <div className="flex gap-16 items-end">
             <div className='flex flex-col w-full'>
               <span className=" text-[#56616B]">Available Balance</span>
               <span className=" text-[#131316] text-4xl font-black w-full ">
 
-                USD 120,500.00
+                USD {wallet?.balance ? wallet?.balance : 0}
               </span>
             </div>
             <button className='rounded-full bg-black text-white py-3.5 px-12'>
               Withdraw
             </button>
           </div>
-          <MainChart pageData={[120, 35, 200]} />
+          <MainChart pageData={transactions.map((item)=> item.amount)} />
+          <span className="w-full flex items-center justify-between gap-2">
+            <small  className="w-32"> {transactions[0]?.date ?? ''} </small>
+            <hr className="w-full"/>
+            <small className="w-32"> {transactions[`${transactions?.length -1}`]?.date ?? ''} </small>
+            
+          </span>
 
         </div>
         <div className="flex flex-col gap-8 w-full">
           <div className="flex justify-between w-full">
             <div className="flex flex-col gap-4 justify-start">
-              <p className=" text-[#56616B] font-semibold">Ledger Balane</p>
-              <p className=" text-[#131316] font-bold text-3xl">12,000</p>
+              <p className=" text-[#56616B] font-semibold">Ledger Balance</p>
+              <p className=" text-[#131316] font-bold text-3xl">USD {wallet?.ledger_balance.toFixed(2) ?? 0} </p>
             </div>
             <div className="mt-1"><IoInformationCircleOutline /> </div>
           </div>
           <div className="flex justify-between w-full">
             <div className="flex flex-col gap-4 justify-start">
-              <p className=" text-[#56616B] font-semibold">Ledger Balane</p>
-              <p className=" text-[#131316] font-bold text-3xl">12,000</p>
+              <p className=" text-[#56616B] font-semibold">Total Payout</p>
+              <p className=" text-[#131316] font-bold text-3xl">USD {wallet?.total_payout.toFixed(2) ?? 0} </p>
             </div>
             <div className="mt-1"><IoInformationCircleOutline /> </div>
           </div>
           <div className="flex justify-between w-full">
             <div className="flex flex-col gap-4 justify-start">
-              <p className=" text-[#56616B] font-semibold">Ledger Balane</p>
-              <p className=" text-[#131316] font-bold text-3xl">12,000</p>
+              <p className=" text-[#56616B] font-semibold">Total Revenue</p>
+              <p className=" text-[#131316] font-bold text-3xl"> USD {wallet?.total_revenue.toFixed(2) ?? 0}</p>
+            </div>
+            <div className="mt-1"><IoInformationCircleOutline /> </div>
+          </div>
+          <div className="flex justify-between w-full">
+            <div className="flex flex-col gap-4 justify-start">
+              <p className=" text-[#56616B] font-semibold"> Pending Payout</p>
+              <p className=" text-[#131316] font-bold text-3xl"> USD {wallet?.pending_payout.toFixed(2) ?? 0}</p>
             </div>
             <div className="mt-1"><IoInformationCircleOutline /> </div>
           </div>
@@ -109,7 +139,7 @@ export default function Home() {
 
         <div className="grid">
 
-          <p className="text-[#131316] font-black "> {transactions.length} Transactions</p>
+          <p className="text-[#131316] font-black "> {transactions?.length} Transactions</p>
           <p className="text-sm text-[#56616B "> {filter.date.length < 4 ? `Your transactions ` : `Your transactions for ${filter.date} `}</p>
         </div>
         <div className="flex items-center gap-3">
@@ -128,7 +158,7 @@ export default function Home() {
               leaveTo="transform opacity-0 translate-x-full"
             >
 
-              <div className="w-[500px]  h-[95vh] absolute bg-white shadow-md rounded-[20px] right-1 mt-10 transform -translate-y-1/2 z-20">
+              <div className="w-[500px]  h-[95vh] fixed bg-white shadow-md rounded-[20px] right-1 bottom-0 top-0 z-20">
                 <div className="flex flex-col justify-between h-full">
                   <div className="grid p-4 gap-7">
 
@@ -149,21 +179,44 @@ export default function Home() {
                               className={`rounded-full px-1 text-sm border hover:bg-gray-300 py-2 w-full font-bold text-[#131316] ${filter.date === date ? 'bg-gray-300' : 'bg-[#EFF1F6]'}`}
                               onClick={() => {
                                 setFilter({ ...filter, date });
+                                // switch (date) {
+                                //   case 'Today':
+                                //     setTransactions(transactions.filter((item) => {
+                                //       item.date === getFormattedDate()
+                                //     }));
+                                //     break;
+                                //   case 'Last 7 days':
+                                //     break;
+                                //   case 'This month':
+                                //     break;
+                                //   case 'Last 3 months':
+                                //     break;
+                                //   default:
+                                //     break;
+                                // }
                                 switch (date) {
                                   case 'Today':
-                                    setTransactions(transactions.filter((item) => {
-                                      item.date === getFormattedDate()
-                                    }));
+                                    setTransactions(transactions.filter((item) => item.date === getFormattedDate()));
                                     break;
                                   case 'Last 7 days':
+                                    const last7Days = new Date();
+                                    last7Days.setDate(last7Days.getDate() - 7);
+                                    setTransactions(transactions.filter((item) => new Date(item.date) > last7Days));
                                     break;
                                   case 'This month':
+                                    const today = new Date();
+                                    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                                    setTransactions(transactions.filter((item) => new Date(item.date) >= firstDayOfMonth));
                                     break;
                                   case 'Last 3 months':
+                                    const last3Months = new Date();
+                                    last3Months.setMonth(last3Months.getMonth() - 3);
+                                    setTransactions(transactions.filter((item) => new Date(item.date) > last3Months));
                                     break;
                                   default:
                                     break;
                                 }
+                                
                               }}
                             >
                               {date}
@@ -215,7 +268,11 @@ export default function Home() {
 
                   </div>
                   <div className="flex items-center justify-between w-full p-4 gap-3">
-                    <ButtonGray title="Clear" type="reset" />
+                    <ButtonGray title="Clear" type="reset" handleClick={()=>{
+                      setFilter({...filter, date: ''});
+                      setShow(false);
+                      fetchData()
+                    }} />
                     <button className="w-full rounded-full bg-[#131316] text-white py-3 px-6 font-semibold " onClick={() => {
                       setShow(false)
                     }}>
@@ -242,7 +299,10 @@ export default function Home() {
               <TransactionCard type={trans.type} amount={trans.amount} date={trans.date} product={trans.metadata?.product_name} name={trans.metadata?.name} status={trans.status} />
             </div>
           })
-          : <PlaceholderCard />
+          : <PlaceholderCard handleClick={()=> {
+            fetchData();
+            setFilter({...filter, date:''})
+          }} />
         }
       </section>
 

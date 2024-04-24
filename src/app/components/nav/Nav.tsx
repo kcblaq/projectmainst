@@ -72,7 +72,7 @@ const Nav = () => {
     </div>
 
     return (
-        <nav className='h-[64px] bg-white w-full p-5 px-7 rounded-full shadow-md flex justify-between items-center'>
+        <nav className='h-[64px] bg-white w-full px-5 rounded-full shadow-md flex justify-between items-center'>
             <Link href={'/'}><Logo /></Link>
             <div className='flex items-center gap-[10px] 2xl:gap-[20px] justify-center list-none'>
                 <Link href={`/`} className={`px-[18px] transition-all duration-700 ease-in-out py-2 flex gap-1 items-center hover:bg-gray-200 hover:rounded-full`}> <IoHomeOutline />  Home</Link>
